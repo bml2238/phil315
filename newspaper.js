@@ -1,8 +1,11 @@
 // Create the application helper and add its render target to the page
 const app = new PIXI.Application();
+const app_height = window.innerHeight * 0.9;
+const app_width = window.innerWidth * 0.9;
+
 await app.init({ 
-    width: (window.innerWidth * 0.9), 
-    height: (window.innerHeight * 0.9),
+    width: app_width, 
+    height: app_height,
     background: '#eeeeee' 
 })
 document.body.appendChild(app.canvas);
@@ -14,8 +17,21 @@ app.stage.hitArea = app.screen;
 app.stage.on('pointerup', onDragEnd);
 app.stage.on('pointerupoutside', onDragEnd);
 
+// bad practice but whatever
+const headliner_height = 0.25;  // headline always takes up the whole width
+const normal_height  = 0.3;     // standard stories are squares
+const small_height   = 0.3;
+const small_width    = 0.15;
+const newspaper_slots = new Map();
+
+// these will be the coordinates for where the headliner is on screen
+let headliner_x0;
+let headliner_xx;
+let headliner_y0;
+let headliner_yy;
+
 // Create the sprite and add it to the stage
-const bunny_texture = await PIXI.Assets.load('https://pixijs.com/assets/bunny.png');
+const bunny_texture = await PIXI.Assets.load('bunny.png');
 bunny_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 const newspaper = initNewspaper();
@@ -28,18 +44,50 @@ for (let i = 0; i < 10; i++) {
 
 function initNewspaper() {
     const container = new PIXI.Container();
+    const headliners = new Array();
 
-    // Create a 5x5 grid of bunnies in the container
-    for (let i = 0; i < 25; i++)
-    {
-        const bunny = new PIXI.Sprite(bunny_texture);
+    // just for sizing reference
+    const bunny_sample = new PIXI.Sprite(bunny_texture);
 
-        bunny.x = (i % 5) * 40;
-        bunny.y = Math.floor(i / 5) * 40;
-        container.addChild(bunny);
+    // creating newspaper grid
+    const newpaper_width = 0.35
+    const grid_height = Math.floor(app_height / bunny_sample.height) - 1;
+    const grid_width = Math.round(Math.floor(app_width / bunny_sample.height) * newpaper_width);
+    const grid_slots = new Array(grid_height);
+
+    // initializing story sizes in grid units
+    const headliner_grid_height = Math.round(grid_height * headliner_height);
+    const normal_grid_height = Math.round(grid_height * normal_height);
+    const small_grid_height = Math.round(grid_height * small_height);
+    const small_grid_width = Math.round(grid_height * small_width);
+
+    // populating grid
+    for (let i = 0; i < grid_height; i++) {
+        grid_slots[i] = new Array();
+        for (let k = 0; k < grid_width; k++) {
+            const bunny = new PIXI.Sprite(bunny_texture);
+
+            // headliner collision
+            if (i > 0 && i <= headliner_grid_height &&
+                k != 0 && k != (grid_width - 1)) {
+                headliners.push(bunny);
+                bunny.alpha = 0;
+            }
+
+            bunny.x = k * 40;
+            bunny.y = i * 40;
+            container.addChild(bunny);
+        }
     }
 
-    return container
+    // set headliner dimensions for checking later
+    headliner_x0 = headliners[0].position.x;
+    headliner_y0 = headliners[0].position.y;
+    headliner_xx = headliners[headliners.length - 1].position.x + bunny_sample.width;
+    headliner_yy = headliners[headliners.length - 1].position.y + bunny_sample.height;
+
+    newspaper_slots.set("headliners", headliners);
+    return container;
 }
 
 function createDraggableObject(x, y) {
@@ -81,15 +129,18 @@ function onDragStart() {
 }
 
 function onDragEnd() {
-    if (dragTarget)
-    {
+    if (dragTarget) {
         app.stage.off('pointermove', onDragMove);
         dragTarget.alpha = 1;
+        checkHeadliner(dragTarget);
         dragTarget = null;
     }
 }
 
 function addText(sprite, text) {
+    if (sprite.children[0]) {
+        sprite.removeChild(sprite.children[0])
+    }
     // add text on top
     const sprite_text = new PIXI.Text(text,
     {
@@ -103,4 +154,15 @@ function addText(sprite, text) {
     sprite_text.anchor.x = sprite_text.anchor.y = 0.5;
     sprite_text.scale.set(0.5);
     sprite.addChild(sprite_text);
+}
+
+function checkHeadliner(sprite) {
+    if (sprite.x > headliner_x0 && sprite.x < headliner_xx) {
+        if (sprite.y > headliner_y0 && sprite.y < headliner_yy) {
+            sprite.x = Math.round((headliner_x0 + headliner_xx) / 2);
+            sprite.y = Math.round((headliner_y0 + headliner_yy) / 2);
+
+            //TODO: change dimensions of story to match headline space
+        }
+    }
 }
