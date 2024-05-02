@@ -1,11 +1,11 @@
-import { initNewspaper, checkStorySlot, getHeadliner } from './newspaper.js';
+import { initNewspaper, checkStorySlot, getHeadliner, removeFromPaper } from './newspaper.js';
 
 // Create the application helper and add its render target to the page
 const app = new PIXI.Application();
 
 // define the size of the app
-const app_height = window.innerHeight * 0.9;
-const app_width = window.innerWidth * 0.9;
+const app_height = window.innerHeight * 0.95;
+const app_width = window.innerWidth * 0.95;
 
 await app.init({ 
     width: app_width, 
@@ -123,6 +123,8 @@ function onDragStart() {
 
     // reorient stories when you pick them up
     dragTarget.rotation = 0;
+
+    removeFromPaper(dragTarget);
 
     app.stage.on('pointermove', onDragMove);
 }
