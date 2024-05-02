@@ -3,10 +3,16 @@ import { initNewspaper, checkHeadliner } from './newspaper.js';
 // Create the application helper and add its render target to the page
 const app = new PIXI.Application();
 
-// define the size of objects
+// define the size of objects and other preferences
+// possible to do is define these in an external file
 const app_height = window.innerHeight * 0.9;
 const app_width = window.innerWidth * 0.9;
 const newpaper_width = 0.35;
+const new_story_interval = 10 * 1000;   // 10 seconds (in milliseconds)
+const starting_stories = 3;         // +1 for < stuff
+const story_spawn_x = 0.5;
+const default_story_height = 40;
+const max_stories_spawned = 12;
 
 await app.init({ 
     width: app_width, 
@@ -25,7 +31,7 @@ app.stage.on('pointerupoutside', onDragEnd);
 // objects to be referenced
 const stories = new Array();
 
-// Create the sprite and add it to the stage
+// Bunny texture, to be replaced (sadly)
 const bunny_texture = await PIXI.Assets.load('bunny.png');
 bunny_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
@@ -34,26 +40,50 @@ bunny_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 const newspaper = initNewspaper(app_height, app_width, newpaper_width, bunny_texture);
 app.stage.addChild(newspaper);
 
-// populates the screen with sprites
-for (let i = 0; i < 10; i++) {
-    const draggable = createDraggableObject(Math.floor(Math.random() * app.screen.width), Math.floor(Math.random() * app.screen.height));
-    // Add it to the stage
-    app.stage.addChild(draggable);
+// create the drawer where stories will spawn
+const drawer_texture = await PIXI.Assets.load('drawer.png');
+drawer_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
+const drawer = new PIXI.Sprite(drawer_texture);
+drawer.anchor = 0.5;
+drawer.x = story_spawn_x * app_width;
+drawer.y = app_height - default_story_height * 2;   // somewhat arbitrary in order to make it look right
+drawer.scale.set(0.8);
+addText(drawer, "new stories spawn here");
+app.stage.addChild(drawer);
 
-    stories.push(draggable);
+
+// initial game state
+for (let i = 0; i < starting_stories; i++) {
+    createSprite("story");
 }
 
 
 
-app.ticker.add((time) => {
-    // Just for fun, let's rotate mr rabbit a little.
-    // * Delta is 1 if running at 100% performance *
-    // * Creates frame-independent transformation *
-    console.log(stories);
-    stories.forEach((story) => {
-        story.rotation += 0.1 * time.deltaTime;
-    });
-});
+function createSprite(spawnZone) {
+    let spawn_x = 0;
+    let spawn_y = 0;
+
+    if (spawnZone == "story") {
+        spawn_x = story_spawn_x * app_width;
+        spawn_y = app_height - default_story_height - 25;
+    }
+
+    const draggable = createDraggableObject(spawn_x, spawn_y);
+    draggable.rotation = Math.random() * 5;
+    // Add it to the stage
+    app.stage.addChild(draggable);
+    
+    //possibly moved to different function
+    addText(draggable, "something")
+
+    stories.push(draggable);
+}
+
+setInterval(function() {
+    if (stories.length < max_stories_spawned) {
+        createSprite("story");
+    }
+ }, new_story_interval) // 2 seconds = 2000 miliseconds
 
 
 
@@ -69,12 +99,8 @@ function createDraggableObject(x, y) {
     draggable.x = x;
     draggable.y = y;
 
-
     //possibly changed in the future
     draggable.scale.set(3);
-
-    //possibly moved to different function
-    addText(draggable, "something")
 
     return draggable;
 }
@@ -91,6 +117,10 @@ function onDragStart() {
     // * We want to track the movement of this particular touch *
     this.alpha = 0.5;
     dragTarget = this;
+
+    // reorient stories when you pick them up
+    dragTarget.rotation = 0;
+
     app.stage.on('pointermove', onDragMove);
 }
 
