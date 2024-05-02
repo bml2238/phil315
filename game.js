@@ -1,18 +1,11 @@
-import { initNewspaper, checkHeadliner } from './newspaper.js';
+import { initNewspaper, checkStorySlot, getHeadliner } from './newspaper.js';
 
 // Create the application helper and add its render target to the page
 const app = new PIXI.Application();
 
-// define the size of objects and other preferences
-// possible to do is define these in an external file
+// define the size of the app
 const app_height = window.innerHeight * 0.9;
 const app_width = window.innerWidth * 0.9;
-const newpaper_width = 0.35;
-const new_story_interval = 10 * 1000;   // 10 seconds (in milliseconds)
-const starting_stories = 3;         // +1 for < stuff
-const story_spawn_x = 0.5;
-const default_story_height = 40;
-const max_stories_spawned = 12;
 
 await app.init({ 
     width: app_width, 
@@ -28,17 +21,27 @@ app.stage.hitArea = app.screen;
 app.stage.on('pointerup', onDragEnd);
 app.stage.on('pointerupoutside', onDragEnd);
 
-// objects to be referenced
-const stories = new Array();
+// game preferences
+const newpaper_width = 0.35;
+const new_story_interval = 10 * 1000;   // 10 seconds (in milliseconds)
+const starting_stories = 3;         // +1 for < stuff
+const story_spawn_x = 0.5;
+const default_story_height = 40;
+const max_stories_spawned = 12;
+
 
 // Bunny texture, to be replaced (sadly)
 const bunny_texture = await PIXI.Assets.load('bunny.png');
 bunny_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 
-// initialize the newspaper object
+// objects to be referenced (bad practice whatever)
+const stories = new Array();
+
+// initialize the newspaper stuff
 const newspaper = initNewspaper(app_height, app_width, newpaper_width, bunny_texture);
 app.stage.addChild(newspaper);
+
 
 // create the drawer where stories will spawn
 const drawer_texture = await PIXI.Assets.load('drawer.png');
@@ -54,12 +57,12 @@ app.stage.addChild(drawer);
 
 // initial game state
 for (let i = 0; i < starting_stories; i++) {
-    createSprite("story");
+    createSprite("story", "something");
 }
 
 
 
-function createSprite(spawnZone) {
+function createSprite(spawnZone, text) {
     let spawn_x = 0;
     let spawn_y = 0;
 
@@ -74,14 +77,14 @@ function createSprite(spawnZone) {
     app.stage.addChild(draggable);
     
     //possibly moved to different function
-    addText(draggable, "something")
+    addText(draggable, text)
 
     stories.push(draggable);
 }
 
 setInterval(function() {
     if (stories.length < max_stories_spawned) {
-        createSprite("story");
+        createSprite("story", "new story");
     }
  }, new_story_interval) // 2 seconds = 2000 miliseconds
 
@@ -128,7 +131,7 @@ function onDragEnd() {
     if (dragTarget) {
         app.stage.off('pointermove', onDragMove);
         dragTarget.alpha = 1;
-        checkHeadliner(dragTarget);
+        checkStorySlot(dragTarget);
         dragTarget = null;
     }
 }

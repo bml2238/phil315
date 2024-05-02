@@ -11,6 +11,8 @@ const small_height   = 0.3;
 const small_width    = 0.15;
 const newspaper_slots = new Map();
 
+let headliner = undefined;
+
 export function initNewspaper(app_height, app_width, newpaper_width, bunny_texture) {
     const container = new PIXI.Container();
     const headliners = new Array();
@@ -58,13 +60,43 @@ export function initNewspaper(app_height, app_width, newpaper_width, bunny_textu
     return container;
 }
 
-export function checkHeadliner(sprite) {
-    if (sprite.x > headliner_x0 && sprite.x < headliner_xx) {
-        if (sprite.y > headliner_y0 && sprite.y < headliner_yy) {
-            sprite.x = Math.round((headliner_x0 + headliner_xx) / 2);
-            sprite.y = Math.round((headliner_y0 + headliner_yy) / 2);
+export function checkStorySlot(sprite) {
+    if (checkHeadliner(sprite)) {
+        // if there already is a headliner, replace it
+        if (headliner) {
+            headliner.x += 400;                         // move the other headliner out of the way
+            headliner.y += (Math.random() * 50) - 25;   // little wiggle
+        }
+        setHeadliner(sprite)
 
-            //TODO: change dimensions of story to match headline space
+        //TODO: match headliner dimensions
+    } 
+    else {
+        // moving the current headliner out of the slot
+        if (headliner == sprite) {
+            headliner = undefined;
         }
     }
+
+    console.log(headliner);
+}
+
+function checkHeadliner(sprite) {
+    if (sprite.x > headliner_x0 && sprite.x < headliner_xx) {
+        if (sprite.y > headliner_y0 && sprite.y < headliner_yy) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function setHeadliner(sprite) {
+    sprite.x = Math.round((headliner_x0 + headliner_xx) / 2);
+    sprite.y = Math.round((headliner_y0 + headliner_yy) / 2);
+    headliner = sprite;
+}
+
+export function getHeadliner() {
+    return headliner;
 }
