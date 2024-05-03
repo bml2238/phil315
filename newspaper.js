@@ -99,8 +99,8 @@ export function checkStorySlot(story) {
             return
     }      
 
-    if (checkHeadliner(sprite)) {
-        setHeadliner(sprite)
+    if (checkHeadliner(story)) {
+        setHeadliner(story)
 
         //TODO: match headliner dimensions
         return;
@@ -110,28 +110,29 @@ export function checkStorySlot(story) {
         console.log(col1_divide)
         console.log(sprite.y)
         if (sprite.y < col1_divide) {
-            setSlot(sprite, 0)
+            setSlot(story, 0)
             console.log("bunny is in slot 0")
         }
         else {
-            setSlot(sprite, 1)
+            setSlot(story, 1)
             console.log("bunny is in slot 1")
         }
     }
     else {
         console.log("bunny is on the right")
         if (sprite.y < col2_divide) {
-            setSlot(sprite, 2)
+            setSlot(story, 2)
             console.log("bunny is in slot 2")
         }
         else {
-            setSlot(sprite, 3)
+            setSlot(story, 3)
             console.log("bunny is in slot 3")
         }
     }
 }
 
-function checkHeadliner(sprite) {
+function checkHeadliner(story) {
+    const sprite = story.sprite;
     if (sprite.x > headliner_x0 && sprite.x < headliner_xx) {
         if (sprite.y > headliner_y0 && sprite.y < headliner_yy) {
             return true;
@@ -141,42 +142,44 @@ function checkHeadliner(sprite) {
     return false;
 }
 
-function setHeadliner(sprite) {
+function setHeadliner(story) {
+    const sprite = story.sprite;
     // if there already is a headliner, replace it
     if (headliner) {
-        headliner.x = headliner_xx + 200;           // move the other headliner out of the way
-        headliner.y += (Math.random() * 50) - 25;   // little wiggle
+        headliner.sprite.x = headliner_xx + 200;           // move the other headliner out of the way
+        headliner.sprite.y += (Math.random() * 50) - 25;   // little wiggle
     }
     sprite.x = Math.round((headliner_x0 + headliner_xx) / 2);
     sprite.y = Math.round((headliner_y0 + headliner_yy) / 2);
-    headliner = sprite;
+    headliner = story;
 }
 
-function setSlot(sprite, slot_num) {
+function setSlot(story, slot_num) {
+    const sprite = story.sprite;
     if (story_slots[slot_num]) {
-        story_slots[slot_num].x = other_xx + 200;
-        story_slots[slot_num].y += (Math.random() * 50) - 100;
+        story_slots[slot_num].sprite.x = other_xx + 200;
+        story_slots[slot_num].sprite.y += (Math.random() * 50) - 100;
     }
     switch(slot_num) {
         case 0: 
             sprite.x = Math.round((other_x0 + center_line) / 2);
             sprite.y = Math.round((other_y0 + col1_divide) / 2);
-            story_slots[0] = sprite;
+            story_slots[0] = story;
             break;
         case 1: 
             sprite.x = Math.round((other_x0 + center_line) / 2);
             sprite.y = Math.round((col1_divide + other_yy) / 2);
-            story_slots[1] = sprite;
+            story_slots[1] = story;
             break
         case 2: 
             sprite.x = Math.round((center_line + other_xx) / 2);
             sprite.y = Math.round((other_y0 + col2_divide) / 2);
-            story_slots[2] = sprite;
+            story_slots[2] = story;
             break
         case 3: 
             sprite.x = Math.round((center_line + other_xx) / 2);
             sprite.y = Math.round((col2_divide + other_yy) / 2);
-            story_slots[3] = sprite;
+            story_slots[3] = story;
             break
         default:
             return
@@ -184,12 +187,11 @@ function setSlot(sprite, slot_num) {
 }
 
 export function removeFromPaper(story) {
-    const sprite = story.sprite;
-    if (sprite == headliner) {
+    if (story == headliner) {
         headliner = undefined;
     }
-    else if (story_slots.some(slot => slot == sprite)) {
-        story_slots[story_slots.indexOf(sprite)] = undefined;
+    else if (story_slots.some(slot => slot == story)) {
+        story_slots[story_slots.indexOf(story)] = undefined;
     }
 }
 

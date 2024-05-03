@@ -158,7 +158,9 @@ function addText(sprite, text, subtext = '') {
     if (sprite.children[0]) {
         sprite.removeChild(sprite.children[0])
     }
-    // add text on top
+
+    const container = new PIXI.Container();
+
     const sprite_text = new PIXI.Text(text, {
       fill : 0x000000,
       align : 'center',
@@ -172,7 +174,26 @@ function addText(sprite, text, subtext = '') {
     sprite_text.scaleMode = PIXI.SCALE_MODES.NEAREST;
     sprite_text.anchor.x = sprite_text.anchor.y = 0.5;
     sprite_text.scale.set(0.15 + 1/text.length);    // longer text is slightly smaller
-    sprite.addChild(sprite_text);
+    container.addChild(sprite_text);
+
+    subtext = "expected readers: " + subtext;
+    const sprite_subtext = new PIXI.Text(subtext, {
+        fill : 0x000000,
+        align : 'center',
+        fontFamily: "Courier New",
+        fontSize: 40,
+        wordWrap : true,
+        wordWrapWidth : sprite.width * 100,
+        cacheAsBitmap: true, // for better performance
+      }); 
+    sprite_subtext.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    sprite_subtext.anchor.x = sprite_subtext.anchor.y = 0.5;
+    sprite_subtext.scale.set(0.12);    // longer text is slightly smaller
+    sprite_subtext.x = sprite_text.x
+    sprite_subtext.y = sprite_text.y + sprite_text.height/2 + 5;    // the + is for padding
+    container.addChild(sprite_subtext);
+
+    sprite.addChild(container);
 }
 
 function getStoryFromSprite(sprite) {
