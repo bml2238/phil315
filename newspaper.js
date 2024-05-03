@@ -90,7 +90,8 @@ export function initNewspaper(app_height, app_width, newpaper_width, bunny_textu
     return container;
 }
 
-export function checkStorySlot(sprite) {
+export function checkStorySlot(story) {
+    const sprite = story.sprite;
     if (sprite.x < headliner_x0 ||      // too high
         sprite.y < headliner_y0 ||      // too far left
         sprite.x > other_xx     ||      // too far right
@@ -182,7 +183,8 @@ function setSlot(sprite, slot_num) {
     }
 }
 
-export function removeFromPaper(sprite) {
+export function removeFromPaper(story) {
+    const sprite = story.sprite;
     if (sprite == headliner) {
         headliner = undefined;
     }

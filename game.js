@@ -1,4 +1,5 @@
 import { initNewspaper, checkStorySlot, getHeadliner, removeFromPaper } from './newspaper.js';
+import { getStory } from './stories.js';
 
 // Create the application helper and add its render target to the page
 const app = new PIXI.Application();
@@ -10,7 +11,7 @@ const app_width = window.innerWidth * 0.95;
 await app.init({ 
     width: app_width, 
     height: app_height,
-    background: '#eeeeee' 
+    background: '#eeeeee', 
 })
 document.body.appendChild(app.canvas);
 
@@ -51,18 +52,34 @@ drawer.anchor = 0.5;
 drawer.x = story_spawn_x * app_width;
 drawer.y = app_height - default_story_height * 2;   // somewhat arbitrary in order to make it look right
 drawer.scale.set(0.8);
-addText(drawer, "new stories spawn here");
+const sprite_text = new PIXI.Text("new stories spawn here", {
+    fontFamily: "Courier New",
+    fontSize: 20,
+    fill : 0x666666,
+    align : 'center',
+    cacheAsBitmap: true, // for better performance
+});    
+sprite_text.SCALE_MODES = PIXI.SCALE_MODES.NEAREST;
+sprite_text.anchor.x = sprite_text.anchor.y = 0.5;
+//sprite_text.scale.set(0.5);
+drawer.addChild(sprite_text);
 app.stage.addChild(drawer);
+// i tried to move all this to another function and it broke so just 
 
+
+setInterval(function() {
+    if (stories.length < max_stories_spawned) {
+        createStory("story");
+    }
+ }, new_story_interval) // 2 seconds = 2000 miliseconds
 
 // initial game state
 for (let i = 0; i < starting_stories; i++) {
-    createSprite("story", "something");
+    createStory("story");
 }
 
 
-
-function createSprite(spawnZone, text) {
+function createStory(spawnZone) {
     let spawn_x = 0;
     let spawn_y = 0;
 
@@ -75,20 +92,17 @@ function createSprite(spawnZone, text) {
     draggable.rotation = Math.random() * 5;
     // Add it to the stage
     app.stage.addChild(draggable);
+
+    let story = getStory();
+    story.sprite = draggable;
+
+    addText(draggable, story.headline, story.expected_readers);
     
     //possibly moved to different function
-    addText(draggable, text)
+    //addText(draggable, text)
 
-    stories.push(draggable);
+    stories.push(story);
 }
-
-setInterval(function() {
-    if (stories.length < max_stories_spawned) {
-        createSprite("story", "new story");
-    }
- }, new_story_interval) // 2 seconds = 2000 miliseconds
-
-
 
 function createDraggableObject(x, y) {
     // Create our little bunny friend..
@@ -124,7 +138,8 @@ function onDragStart() {
     // reorient stories when you pick them up
     dragTarget.rotation = 0;
 
-    removeFromPaper(dragTarget);
+    const story = getStoryFromSprite(dragTarget);
+    removeFromPaper(story);
 
     app.stage.on('pointermove', onDragMove);
 }
@@ -133,26 +148,33 @@ function onDragEnd() {
     if (dragTarget) {
         app.stage.off('pointermove', onDragMove);
         dragTarget.alpha = 1;
-        checkStorySlot(dragTarget);
+        const story = getStoryFromSprite(dragTarget);
+        checkStorySlot(story);
         dragTarget = null;
     }
 }
 
-function addText(sprite, text) {
+function addText(sprite, text, subtext = '') {
     if (sprite.children[0]) {
         sprite.removeChild(sprite.children[0])
     }
     // add text on top
-    const sprite_text = new PIXI.Text(text,
-    {
-      fill : 0x666666,
+    const sprite_text = new PIXI.Text(text, {
+      fill : 0x000000,
       align : 'center',
+      fontFamily: "Courier New",
+      fontSize: 40,
+      wordWrap : true,
+      wordWrapWidth : sprite.width * 4,
       cacheAsBitmap: true, // for better performance
     });    
 
-    sprite_text.SCALE_MODES = PIXI.SCALE_MODES.NEAREST;
-
+    sprite_text.scaleMode = PIXI.SCALE_MODES.NEAREST;
     sprite_text.anchor.x = sprite_text.anchor.y = 0.5;
-    sprite_text.scale.set(0.5);
+    sprite_text.scale.set(0.15 + 1/text.length);    // longer text is slightly smaller
     sprite.addChild(sprite_text);
+}
+
+function getStoryFromSprite(sprite) {
+    return stories.find((story) => story.sprite == sprite);
 }
