@@ -251,7 +251,7 @@ export function loadStories() {
 
 export function getStory() {
     let index = Math.round(Math.random() * story_data.length);
-    while (used_stories.some((story, i) => i == index)) {   // regenerate if we already have this story
+    while (used_stories.some((story_num) => story_num == index)) {   // regenerate if we already have this story
         index = Math.round(Math.random() * story_data.length);
     }
     used_stories.push(index);
