@@ -24,7 +24,7 @@ app.stage.on('pointerupoutside', onDragEnd);
 
 // game preferences
 const newpaper_width = 0.35;
-const new_story_interval = 10 * 1000;   // 10 seconds (in milliseconds)
+const new_story_interval = 7 * 1000;   // 10 seconds (in milliseconds)
 const starting_stories = 3;         // +1 for < stuff
 const story_spawn_x = 0.5;
 const default_story_height = 40;
@@ -80,6 +80,9 @@ createSubmitButton();
 setInterval(function() {
     if (stories.length < max_stories_spawned) {
         createStory("story");
+    }
+    else {
+        drawer.alpha = 0.5;
     }
  }, new_story_interval) // 2 seconds = 2000 miliseconds
 
@@ -139,7 +142,15 @@ function createStory(spawnZone, title = '') {
 
 
     if (spawnZone == "story") {
-        let story = getStory();
+        let story;
+        // make sure the player always has at least 5 true stories to publish
+        if (needTrueStory) {
+            story = getStory(true);
+        }
+        else {
+            story = getStory();
+        }
+
         story.sprite = draggable;
     
         addText(draggable, story.headline, story.expected_readers);
@@ -400,7 +411,7 @@ function confirmSubmit() {
 
     // change click function to actual submit
     button.off('pointerdown', confirmSubmit, button);
-    button.on('pointerdown', submitPaper, button);
+    button.on('pointerdown', submitPaperClick, button);
     
     // the "cancel" function
     button.on('pointerleave', cancelSubmit, button);
@@ -412,4 +423,36 @@ function cancelSubmit() {
     // "reset" the button by remaking it
     app.stage.removeChild(button);
     createSubmitButton();
+}
+
+function submitPaperClick() {
+    // just calling cancelSubmit didn't work
+    const button = this;
+    
+    // "reset" the button by remaking it
+    app.stage.removeChild(button);
+    createSubmitButton();
+
+    // actual submit function
+    submitPaper();
+}
+
+function needTrueStory() {
+    const stories_remaining = max_stories_spawned - stories.length;
+
+    let true_stories = 0;
+    stories.forEach((story) => {
+        if (story.is_true) {
+            true_stories++;
+        }
+    });
+
+    if (true_stories >= 5) {
+        return false;
+    }
+    else if ((5 - true_stories) == stories_remaining) {
+        return true;
+    }
+    
+    return false;
 }

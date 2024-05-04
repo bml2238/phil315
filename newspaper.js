@@ -208,5 +208,6 @@ export function calculateScore() {
 }
 
 export function submitPaper() {
-    console.log("uwu???");
+    const score = calculateScore();
+    console.log(score);
 }

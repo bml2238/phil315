@@ -250,13 +250,20 @@ export function loadStories() {
 }
 
 
-export function getStory() {
+export function getStory(is_true = false) {
     if (story_data.length == used_stories.length) {
         used_stories = [];
     }
     let index = Math.round(Math.random() * (story_data.length - 1));
     while (used_stories.some((story_num) => story_num == index)) {   // regenerate if we already have this story
-        index = Math.round(Math.random() * story_data.length);
+      index = Math.round(Math.random() * (story_data.length - 1));
+    }
+
+    // if we need a true story, keep generating until we get one
+    if (is_true) {
+      while (!story_data[index].is_true) {
+        index = Math.round(Math.random() * (story_data.length - 1));
+      }
     }
     used_stories.push(index);
 
