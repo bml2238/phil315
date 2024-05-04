@@ -1,4 +1,4 @@
-import { initNewspaper, checkStorySlot, getHeadliner, removeFromPaper } from './newspaper.js';
+import { initNewspaper, checkStorySlot, removeFromPaper, submitPaper } from './newspaper.js';
 import { getStory } from './stories.js';
 
 // Create the application helper and add its render target to the page
@@ -74,6 +74,8 @@ app.stage.addChild(drawer);
 // functions like the drawer
 createSourceSlots();
 
+createSubmitButton();
+
 
 setInterval(function() {
     if (stories.length < max_stories_spawned) {
@@ -148,6 +150,36 @@ function createStory(spawnZone, title = '') {
         addText(draggable, title);
         return draggable;
     }
+}
+
+function createSubmitButton() {
+    const button = new PIXI.Sprite(bunny_texture);
+
+    // place button next to newspaper
+    button.x = app_width * newpaper_width + button.width;
+    button.y = button.height;
+    button.anchor.y = 0.5;
+    button.scale.set(2);
+
+    const sprite_text = new PIXI.Text("Submit paper?", {
+        fill : 0x000000,
+        fontFamily: "Courier New",
+        fontSize: 16,
+        cacheAsBitmap: true, // for better performance
+      });   
+
+    // text to the right of the sprite
+    sprite_text.anchor.x = -0.2;
+    sprite_text.anchor.y = 0.5;
+
+    button.addChild(sprite_text);
+
+    // submit paper function
+    button.eventMode = 'static';
+    button.cursor = 'pointer';
+    button.on('pointerdown', confirmSubmit, button);
+
+    app.stage.addChild(button);
 }
 
 function createDraggableObject(x, y) {
@@ -336,9 +368,48 @@ function spawnSource(story, source) {
     story_source.x = story.sprite.x;
     story_source.y = story.sprite.y;
 
+    // arbitrary color to differentiate from normal stories
     story_source.tint = 0xFFB6C1;
 }
 
 function currentlyChecking() {
     console.log("sorry the story is in progress")
+}
+
+function confirmSubmit() {
+    const button = this;
+    console.log(button);
+
+    if (button.children[0]) {
+        button.removeChild(button.children[0]);
+    }
+
+    // change sprite text
+    const sprite_text = new PIXI.Text("Are you sure?", {
+        fill : 0x000000,
+        fontFamily: "Courier New",
+        fontSize: 16,
+        cacheAsBitmap: true, // for better performance
+      });   
+
+    // text to the right of the sprite
+    sprite_text.anchor.x = -0.2;
+    sprite_text.anchor.y = 0.5;
+
+    button.addChild(sprite_text);
+
+    // change click function to actual submit
+    button.off('pointerdown', confirmSubmit, button);
+    button.on('pointerdown', submitPaper, button);
+    
+    // the "cancel" function
+    button.on('pointerleave', cancelSubmit, button);
+}
+
+function cancelSubmit() {
+    const button = this;
+    
+    // "reset" the button by remaking it
+    app.stage.removeChild(button);
+    createSubmitButton();
 }

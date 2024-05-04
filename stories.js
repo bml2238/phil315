@@ -241,7 +241,11 @@ const story_data = [
     }
   ]
 
-let used_stories = []
+let used_stories = [];
+
+
+// user data
+let total_score = 0;
 
 
 export function loadStories() {
@@ -250,12 +254,14 @@ export function loadStories() {
 
 
 export function getStory() {
-    let index = Math.round(Math.random() * story_data.length);
+    if (story_data.length == used_stories.length) {
+        used_stories = [];
+    }
+    let index = Math.round(Math.random() * (story_data.length - 1));
     while (used_stories.some((story_num) => story_num == index)) {   // regenerate if we already have this story
         index = Math.round(Math.random() * story_data.length);
     }
     used_stories.push(index);
-    console.log("assigning this story:");
-    console.log(story_data[index]);
+
     return story_data[index];
 }

@@ -190,3 +190,23 @@ export function removeFromPaper(story) {
 export function getHeadliner() {
     return story_slots;
 }
+
+export function calculateScore() {
+    let score = 0;
+
+    if (headliner) {
+        score += headliner.expected_readers * 2;
+    }
+
+    story_slots.forEach((story) => {
+        if(story) {
+            score += story.expected_readers;
+        }
+    });
+
+    return score;
+}
+
+export function submitPaper() {
+    console.log("uwu???");
+}
