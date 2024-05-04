@@ -106,27 +106,19 @@ export function checkStorySlot(story) {
         return;
     }
     if (sprite.x < center_line) {
-        console.log("bunny is on the left")
-        console.log(col1_divide)
-        console.log(sprite.y)
         if (sprite.y < col1_divide) {
             setSlot(story, 0)
-            console.log("bunny is in slot 0")
         }
         else {
             setSlot(story, 1)
-            console.log("bunny is in slot 1")
         }
     }
     else {
-        console.log("bunny is on the right")
         if (sprite.y < col2_divide) {
             setSlot(story, 2)
-            console.log("bunny is in slot 2")
         }
         else {
             setSlot(story, 3)
-            console.log("bunny is in slot 3")
         }
     }
 }

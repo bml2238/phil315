@@ -29,6 +29,8 @@ const starting_stories = 3;         // +1 for < stuff
 const story_spawn_x = 0.5;
 const default_story_height = 40;
 const max_stories_spawned = 12;
+const source_slot_width = 0.25;
+const source_check_interval = 10 * 1000; 
 
 
 // Bunny texture, to be replaced (sadly)
@@ -38,10 +40,13 @@ bunny_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 // objects to be referenced (bad practice whatever)
 const stories = new Array();
+const source_slots = new Array();
 
 // initialize the newspaper stuff
 const newspaper = initNewspaper(app_height, app_width, newpaper_width, bunny_texture);
 app.stage.addChild(newspaper);
+const story_texture = await PIXI.Assets.load('story.png');
+story_texture.baseTexture.scaleMode = PIXI.SCALE_MODES.NEAREST;
 
 
 // create the drawer where stories will spawn
@@ -66,6 +71,9 @@ drawer.addChild(sprite_text);
 app.stage.addChild(drawer);
 // i tried to move all this to another function and it broke so just 
 
+// functions like the drawer
+createSourceSlots();
+
 
 setInterval(function() {
     if (stories.length < max_stories_spawned) {
@@ -78,6 +86,40 @@ for (let i = 0; i < starting_stories; i++) {
     createStory("story");
 }
 
+
+
+function createSourceSlots() {
+    createSourceSlot(1);
+    createSourceSlot(2);
+    createSourceSlot(3);
+
+    console.log(source_slots);
+}
+
+function createSourceSlot(index) {
+    const source = new PIXI.Sprite(drawer_texture);
+
+    source.anchor.x = source.anchor.y = 0.5;
+    // halfway between far right and the start of the source slot area
+    source.x = app_width - Math.round(app_width * source_slot_width * 0.5);
+    // either 1/6, 1/2, or 5/6 of the way down
+    source.y = Math.round(app_height * ((index / 3) - 1/6));
+
+    const sprite_text = new PIXI.Text("place story here to check sources", {
+        fontFamily: "Courier New",
+        fontSize: 15,
+        fill : 0x666666,
+        align : 'center',
+        cacheAsBitmap: true, // for better performance
+    });    
+    sprite_text.SCALE_MODES = PIXI.SCALE_MODES.NEAREST;
+    sprite_text.anchor.x = sprite_text.anchor.y = 0.5;
+    source.addChild(sprite_text);
+
+    source_slots[index - 1] = source;
+
+    app.stage.addChild(source);
+}
 
 function createStory(spawnZone) {
     let spawn_x = 0;
@@ -106,7 +148,7 @@ function createStory(spawnZone) {
 
 function createDraggableObject(x, y) {
     // Create our little bunny friend..
-    const draggable = new PIXI.Sprite(bunny_texture);
+    const draggable = new PIXI.Sprite(story_texture);
 
     // Enable the bunny to be interactive... this will allow it to respond to mouse and touch events
     draggable.eventMode = 'static';
@@ -117,7 +159,8 @@ function createDraggableObject(x, y) {
     draggable.y = y;
 
     //possibly changed in the future
-    draggable.scale.set(3);
+    draggable.height = 70;
+    draggable.scale.set(0.75);
 
     return draggable;
 }
@@ -138,6 +181,10 @@ function onDragStart() {
     // reorient stories when you pick them up
     dragTarget.rotation = 0;
 
+    // move the story to the top
+    app.stage.removeChild(dragTarget);
+    app.stage.addChild(dragTarget);
+
     const story = getStoryFromSprite(dragTarget);
     removeFromPaper(story);
 
@@ -148,15 +195,23 @@ function onDragEnd() {
     if (dragTarget) {
         app.stage.off('pointermove', onDragMove);
         dragTarget.alpha = 1;
+
         const story = getStoryFromSprite(dragTarget);
-        checkStorySlot(story);
+
+        if (dragTarget.x < (app_width * newpaper_width)) {
+            checkStorySlot(story);
+        }
+        else if (dragTarget.x > (app_width - app_width * source_slot_width)) {
+            checkSources(story);
+        }
+        
         dragTarget = null;
     }
 }
 
 function addText(sprite, text, subtext = '') {
     if (sprite.children[0]) {
-        sprite.removeChild(sprite.children[0])
+        sprite.removeChild(sprite.children[0]);
     }
 
     const container = new PIXI.Container();
@@ -167,13 +222,14 @@ function addText(sprite, text, subtext = '') {
       fontFamily: "Courier New",
       fontSize: 40,
       wordWrap : true,
-      wordWrapWidth : sprite.width * 4,
+      wordWrapWidth : sprite.width * 2,
       cacheAsBitmap: true, // for better performance
     });    
 
     sprite_text.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    sprite_text.resolution = 0.4;
     sprite_text.anchor.x = sprite_text.anchor.y = 0.5;
-    sprite_text.scale.set(0.15 + 1/text.length);    // longer text is slightly smaller
+    sprite_text.scale.set(0.6 + 1/text.length);    // longer text is slightly smaller
     container.addChild(sprite_text);
 
     subtext = "expected readers: " + subtext;
@@ -187,10 +243,11 @@ function addText(sprite, text, subtext = '') {
         cacheAsBitmap: true, // for better performance
       }); 
     sprite_subtext.scaleMode = PIXI.SCALE_MODES.NEAREST;
+    sprite_subtext.resolution = 0.4;
     sprite_subtext.anchor.x = sprite_subtext.anchor.y = 0.5;
-    sprite_subtext.scale.set(0.12);    // longer text is slightly smaller
-    sprite_subtext.x = sprite_text.x
-    sprite_subtext.y = sprite_text.y + sprite_text.height/2 + 5;    // the + is for padding
+    sprite_subtext.scale.set(0.5);    // longer text is slightly smaller
+    sprite_subtext.x = sprite_text.x;
+    sprite_subtext.y = sprite_text.y + sprite_text.height/2 + 7;    // the + is for padding
     container.addChild(sprite_subtext);
 
     sprite.addChild(container);
@@ -198,4 +255,39 @@ function addText(sprite, text, subtext = '') {
 
 function getStoryFromSprite(sprite) {
     return stories.find((story) => story.sprite == sprite);
+}
+
+function checkSources(story) {
+    
+}
+
+function startCheckSources(story) {
+    const sprite = story.sprite;
+    
+    let current_slot;
+    if (sprite.y < (app_height / 3)) {
+        current_slot = 1;
+        console.log("in slot 1");
+    }
+    else if (sprite.y < 2 * (app_height / 3)) {
+        current_slot = 2;
+        console.log("in slot 2");
+    }
+    else {
+        current_slot = 3;
+        console.log("in slot 3");
+    }
+
+    sprite.x = app_width - Math.round(app_width * source_slot_width * 0.5);
+    sprite.y = Math.round(app_height * ((current_slot / 3) - 1/6));
+
+    const source_slot = source_slots[current_slot - 1];
+    sprite.alpha = 0.3;
+    source_slot.alpha = 0.3;
+
+    const some_time = setTimeout(() => {
+        console.log("helo?");
+        sprite.alpha = 1;
+    source_slot.alpha = 1;
+    }, source_check_interval);
 }
