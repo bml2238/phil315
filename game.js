@@ -121,7 +121,7 @@ function createSourceSlot(index) {
     app.stage.addChild(source);
 }
 
-function createStory(spawnZone) {
+function createStory(spawnZone, title = '') {
     let spawn_x = 0;
     let spawn_y = 0;
 
@@ -135,15 +135,19 @@ function createStory(spawnZone) {
     // Add it to the stage
     app.stage.addChild(draggable);
 
-    let story = getStory();
-    story.sprite = draggable;
 
-    addText(draggable, story.headline, story.expected_readers);
+    if (spawnZone == "story") {
+        let story = getStory();
+        story.sprite = draggable;
     
-    //possibly moved to different function
-    //addText(draggable, text)
+        addText(draggable, story.headline, story.expected_readers);
 
-    stories.push(story);
+        stories.push(story);
+    }
+    else {
+        addText(draggable, title);
+        return draggable;
+    }
 }
 
 function createDraggableObject(x, y) {
@@ -197,12 +201,13 @@ function onDragEnd() {
         dragTarget.alpha = 1;
 
         const story = getStoryFromSprite(dragTarget);
-
-        if (dragTarget.x < (app_width * newpaper_width)) {
-            checkStorySlot(story);
-        }
-        else if (dragTarget.x > (app_width - app_width * source_slot_width)) {
-            checkSources(story);
+        if (story) {
+            if (dragTarget.x < (app_width * newpaper_width)) {
+                checkStorySlot(story);
+            }
+            else if (dragTarget.x > (app_width - app_width * source_slot_width)) {
+                checkSources(story);
+            }
         }
         
         dragTarget = null;
@@ -232,23 +237,25 @@ function addText(sprite, text, subtext = '') {
     sprite_text.scale.set(0.6 + 1/text.length);    // longer text is slightly smaller
     container.addChild(sprite_text);
 
-    subtext = "expected readers: " + subtext;
-    const sprite_subtext = new PIXI.Text(subtext, {
-        fill : 0x000000,
-        align : 'center',
-        fontFamily: "Courier New",
-        fontSize: 40,
-        wordWrap : true,
-        wordWrapWidth : sprite.width * 100,
-        cacheAsBitmap: true, // for better performance
-      }); 
-    sprite_subtext.scaleMode = PIXI.SCALE_MODES.NEAREST;
-    sprite_subtext.resolution = 0.4;
-    sprite_subtext.anchor.x = sprite_subtext.anchor.y = 0.5;
-    sprite_subtext.scale.set(0.5);    // longer text is slightly smaller
-    sprite_subtext.x = sprite_text.x;
-    sprite_subtext.y = sprite_text.y + sprite_text.height/2 + 7;    // the + is for padding
-    container.addChild(sprite_subtext);
+    if (subtext != '') {
+        subtext = "expected readers: " + subtext;
+        const sprite_subtext = new PIXI.Text(subtext, {
+            fill : 0x000000,
+            align : 'center',
+            fontFamily: "Courier New",
+            fontSize: 40,
+            wordWrap : true,
+            wordWrapWidth : sprite.width * 100,
+            cacheAsBitmap: true, // for better performance
+          }); 
+        sprite_subtext.scaleMode = PIXI.SCALE_MODES.NEAREST;
+        sprite_subtext.resolution = 0.4;
+        sprite_subtext.anchor.x = sprite_subtext.anchor.y = 0.5;
+        sprite_subtext.scale.set(0.5);    // longer text is slightly smaller
+        sprite_subtext.x = sprite_text.x;
+        sprite_subtext.y = sprite_text.y + sprite_text.height/2 + 7;    // the + is for padding
+        container.addChild(sprite_subtext);
+    }
 
     sprite.addChild(container);
 }
@@ -258,7 +265,8 @@ function getStoryFromSprite(sprite) {
 }
 
 function checkSources(story) {
-    
+    //TODO: some confirmation message?
+    startCheckSources(story);
 }
 
 function startCheckSources(story) {
@@ -267,27 +275,65 @@ function startCheckSources(story) {
     let current_slot;
     if (sprite.y < (app_height / 3)) {
         current_slot = 1;
-        console.log("in slot 1");
     }
     else if (sprite.y < 2 * (app_height / 3)) {
         current_slot = 2;
-        console.log("in slot 2");
     }
     else {
         current_slot = 3;
-        console.log("in slot 3");
     }
 
+    // move story to center of slot
     sprite.x = app_width - Math.round(app_width * source_slot_width * 0.5);
     sprite.y = Math.round(app_height * ((current_slot / 3) - 1/6));
 
+    // disable slot and story
     const source_slot = source_slots[current_slot - 1];
     sprite.alpha = 0.3;
     source_slot.alpha = 0.3;
+    sprite.off('pointerdown', onDragStart, sprite);
+    sprite.on('pointerdown', currentlyChecking, sprite);
 
     const some_time = setTimeout(() => {
-        console.log("helo?");
-        sprite.alpha = 1;
-    source_slot.alpha = 1;
+        endCheckSources(story, some_time);
     }, source_check_interval);
+}
+
+function endCheckSources(story, timeout) {
+    const sprite = story.sprite;
+    console.log(timeout);
+
+    // re-enable story
+    sprite.off('pointerdown', currentlyChecking, sprite);
+    sprite.on('pointerdown', onDragStart, sprite);
+    sprite.alpha = 1;
+
+    // create source objects
+    spawnSource(story, story.source1)
+    if (story.source2) {
+        spawnSource(story, story.source2)
+    }
+    if (story.source3) {
+        spawnSource(story, story.source2)
+    }
+
+    // move story out
+    sprite.x = sprite.x - (app_width * source_slot_width);
+    sprite.y += (Math.random() * 50) - 25;   // little wiggle
+}
+
+function spawnSource(story, source) {
+    const story_source = createStory("source", source);
+    story_source.scale.set(0.6);
+
+    // place source in the source slot
+    story_source.anchor.x = story_source.anchor.y = 0.5;
+    story_source.x = story.sprite.x;
+    story_source.y = story.sprite.y;
+
+    story_source.tint = 0xFFB6C1;
+}
+
+function currentlyChecking() {
+    console.log("sorry the story is in progress")
 }

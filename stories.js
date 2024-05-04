@@ -19,8 +19,8 @@ const story_data = [
       "headline": "New Variety of Potato Set to Revolutionise Our Eating Habits",
       "is_true": "misleading",
       "expected_readers": 150,
-      "source1": "[scientific paper about a new",
-      "source2": "temperature resistent potato variety]",
+      "source1": "[scientific paper about a new, temperature resistent potato variety]",
+      "source2": "",
       "source3": ""
     },
     {
@@ -28,8 +28,8 @@ const story_data = [
       "is_true": true,
       "expected_readers": 100,
       "source1": "[report showing potatos dying off in high temperatures]",
-      "source2": "[scientific paper about a new",
-      "source3": "temperature resistent potato variety]"
+      "source2": "[scientific paper about a new, temperature resistent potato variety]",
+      "source3": ""
     },
     {
       "headline": "The World’s Biggest Potato Measuring Over 1M",
@@ -91,16 +91,16 @@ const story_data = [
       "headline": "Nastle Files for Chapter 13 Bankruptcy",
       "is_true": false,
       "expected_readers": 300,
-      "source1": "Quote from Nastle insider: 'yeah back a few years ago we considered bankrupcy",
-      "source2": "after all those investigations'",
+      "source1": "Quote from Nastle insider: 'yeah back a few years ago we considered bankrupcy, after all those investigations'",
+      "source2": "",
       "source3": ""
     },
     {
       "headline": "Vampire Weekend Names Their Third-Born Son Lucifer",
       "is_true": true,
       "expected_readers": 60,
-      "source1": "[social media post from Vampire Weekend announcing the birth of their son",
-      "source2": "Lucifer]",
+      "source1": "[social media post from Vampire Weekend announcing the birth of their son, Lucifer]",
+      "source2": "",
       "source3": ""
     },
     {
@@ -115,16 +115,16 @@ const story_data = [
       "headline": "Man From Hit Movie Steals the Constitution of Keneland",
       "is_true": "misleading",
       "expected_readers": 140,
-      "source1": "[advertisement from upcoming movie",
-      "source2": "Let's Steal Keneland]",
+      "source1": "[advertisement from upcoming movie, Let's Steal Keneland]",
+      "source2": "",
       "source3": ""
     },
     {
       "headline": "New Movie About Stealing the Consitution of Keneland Entering Production",
       "is_true": true,
       "expected_readers": 40,
-      "source1": "[advertisement from upcoming movie",
-      "source2": "Let's Steal Keneland]",
+      "source1": "[advertisement from upcoming movie, Let's Steal Keneland]",
+      "source2": "",
       "source3": ""
     },
     {
@@ -155,8 +155,8 @@ const story_data = [
       "headline": "Warren Duffett Becomes World’s First Trillionaire",
       "is_true": false,
       "expected_readers": 90,
-      "source1": "Quote from economics professor: 'Should these trends continue",
-      "source2": "I wouldn't be surprised if someone like Duffet eventually got to a trillion dollars'",
+      "source1": "Quote from economics professor: 'Should these trends continue, I wouldn't be surprised if someone like Duffet eventually got to a trillion dollars'",
+      "source2": "",
       "source3": ""
     },
     {
@@ -188,7 +188,7 @@ const story_data = [
       "is_true": true,
       "expected_readers": 100,
       "source1": "[social media post from employer announcing account mistake]",
-      "source2": "[original copy of sale contract",
+      "source2": "[original copy of sale contract showing 'million' scribbled out]",
       "source3": ""
     },
     {
@@ -255,5 +255,7 @@ export function getStory() {
         index = Math.round(Math.random() * story_data.length);
     }
     used_stories.push(index);
+    console.log("assigning this story:");
+    console.log(story_data[index]);
     return story_data[index];
 }
