@@ -13,15 +13,8 @@ const story_data = [
       "expected_readers": 125,
       "source1": "[photo of pink koala]",
       "source2": "",
-      "source3": ""
-    },
-    {
-      "headline": "New Variety of Potato Set to Revolutionise Our Eating Habits",
-      "is_true": "misleading",
-      "expected_readers": 150,
-      "source1": "[scientific paper about a new, temperature resistent potato variety]",
-      "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Pink Koala Photo was Photoshopped"
     },
     {
       "headline": "New Potato Variety Created to Survive Warming Climate",
@@ -37,7 +30,8 @@ const story_data = [
       "expected_readers": 200,
       "source1": "Quote from winner of local potato contest: 'I bet next year they could almost be a meter long! I ain't there yet though'",
       "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Potato Not Actually Over 1M (Yet)"
     },
     {
       "headline": "Small Volcanic Eruption Forcast in Northern Regions",
@@ -61,15 +55,17 @@ const story_data = [
       "expected_readers": 200,
       "source1": "[quote from anonymous source claiming that the North Jestan leader hates butterflies and tattoos]",
       "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Anonymous Source Unverified, Butterfly Tattoos Still Legal in North Jestan"
     },
     {
       "headline": "New Virus Found in Muzzaetos Union, Already Killed 33",
-      "is_true": "misleading",
+      "is_true": false,
       "expected_readers": 150,
       "source1": "[data showing Muzzaetos Union flu seasons kills around 100-150 per year]",
       "source2": "biologists in Muzzaetos Union debate classification of flu varient",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Flu Varient Mistaken as 'New Virus'"
     },
     {
       "headline": "Muzzaetian Flu Season Extra Deadly",
@@ -93,7 +89,8 @@ const story_data = [
       "expected_readers": 300,
       "source1": "Quote from Nastle insider: 'yeah back a few years ago we considered bankrupcy, after all those investigations'",
       "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Nastle Still in Business"
     },
     {
       "headline": "Vampire Weekend Names Their Third-Born Son Lucifer",
@@ -109,15 +106,17 @@ const story_data = [
       "expected_readers": 350,
       "source1": "[anonymous social media post claiming the government wants to arrest everyone]",
       "source2": "[cult leader announces the end on September 2nd]",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Government Arrest Rumors Actually False"
     },
     {
       "headline": "Man From Hit Movie Steals the Constitution of Keneland",
-      "is_true": "misleading",
+      "is_true": false,
       "expected_readers": 140,
       "source1": "[advertisement from upcoming movie, Let's Steal Keneland]",
       "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "Keneland Constitution Theft Actually a PR Stunt"
     },
     {
       "headline": "New Movie About Stealing the Consitution of Keneland Entering Production",
@@ -137,11 +136,12 @@ const story_data = [
     },
     {
       "headline": "A Myserious Object Seen Flying Over Rural Zerthania",
-      "is_true": "misleading",
+      "is_true": false,
       "expected_readers": 100,
       "source1": "[phone footage of blurry object in the sky]",
       "source2": "[announcement from airlines about starting new Zerthanian routes]",
-      "source3": ""
+      "source3": "",
+      "rertaction": "'Mysterious Object' Turns Out to be Plane"
     },
     {
       "headline": "New Plane Routes Begin over Zerthania",
@@ -157,7 +157,8 @@ const story_data = [
       "expected_readers": 90,
       "source1": "Quote from economics professor: 'Should these trends continue, I wouldn't be surprised if someone like Duffet eventually got to a trillion dollars'",
       "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "No Trillionaires (Yet)"
     },
     {
       "headline": "Anonymous Person Steals $1 Million Worth of Ambacoin",
@@ -173,7 +174,8 @@ const story_data = [
       "expected_readers": 400,
       "source1": "[census data showing certain areas experienced 100% population growth]",
       "source2": "",
-      "source3": ""
+      "source3": "",
+      "rertaction": "World Population Will Not Quadruple"
     },
     {
       "headline": "10 Troubling Secrets About Will Gates",
@@ -201,11 +203,12 @@ const story_data = [
     },
     {
       "headline": "Unexplained Phenomenon Causes Livestock to Vanish in Rural Stoland",
-      "is_true": "misleading",
+      "is_true": false,
       "expected_readers": 150,
       "source1": "[government announcement about new wildlife restoration project]",
       "source2": "[population study of wolves in Stoland shows increasing number of wolves]",
-      "source3": ""
+      "source3": "",
+      "rertaction": "'Unexplain Phenomenon' Actually Just Wolves"
     },
     {
       "headline": "Wolves Return to Stoland, Causing Problems for Ranchers",
@@ -217,11 +220,12 @@ const story_data = [
     },
     {
       "headline": "Mysterious Illness Strikes Antarctic Research Station, Quarantine Initiated",
-      "is_true": "misleading",
-      "expected_readers": 90,
+      "is_true": false,
+      "expected_readers": 120,
       "source1": "[social media post of Antarctic researcher announcing they are in bed rest]",
       "source2": "Quote from Antarctic researcher: 'We had no idea that she was allergic. Oops'",
-      "source3": ""
+      "source3": "",
+      "rertaction": "'Mysterious Illness' Turns Out to be Allergies"
     },
     {
       "headline": "Renowned Chef Bankrupt After Being Fined by Strupheeny Republic for Unlicensed Use of Truffles",
@@ -230,14 +234,6 @@ const story_data = [
       "source1": "[announcement from Strupheeny Republic that truffles are now banned]",
       "source2": "[police records showing arrests of drug traffickers claiming that drugs were just truffles]",
       "source3": "[social media post from chef complaining about Strupheeny Republic laws]"
-    },
-    {
-      "headline": "Study Predicts Volanic Eruption to Destroy the North",
-      "is_true": "misleading",
-      "expected_readers": 250,
-      "source1": "[reports about unusual seismic activity in small part of the Nothern Regions]",
-      "source2": "[local government ordinance asking certain citizens to evacuate]",
-      "source3": ""
     }
   ]
 
@@ -246,6 +242,7 @@ let used_stories = [];
 
 // user data
 let total_score = 0;
+let current_day = 0;
 
 
 export function loadStories() {
