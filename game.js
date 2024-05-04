@@ -283,6 +283,11 @@ function startCheckSources(story) {
         current_slot = 3;
     }
 
+    // if slot is tinted, it's already used
+    if (source_slots[current_slot - 1].alpha < 1) {
+        return;
+    }
+
     // move story to center of slot
     sprite.x = app_width - Math.round(app_width * source_slot_width * 0.5);
     sprite.y = Math.round(app_height * ((current_slot / 3) - 1/6));
